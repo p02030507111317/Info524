@@ -1,0 +1,88 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\author{Paul CLAVIER}
+\title{[Info 524]Système d'exploitation}
+\begin{document}
+%head
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+%body
+\section{Processus}
+	\subsection{C'est quoi?}
+		\begin{center}
+			processus $\neq$ programme
+		\end{center}
+		Un processus est un programme en cours d’exécution. En particulier, un programme peut donner plusieurs processus. Avec un processus, l'OS garde de nombreuses informations comme:
+		\begin{itemize}
+			\item adresse mémoire de l’exécutable
+			\item l'utilisateur qui a lancé le programme
+			\item l'heure de début
+			\item le PID
+			\item la priorité
+			\item le compteur ordinal
+			\item la liste des fichiers ouverts
+			\item l'état
+			\item la liste des processus créés			
+		\end{itemize}
+	\subsection{États}
+		Un processus peut être:
+		\begin{itemize}
+			\item en exécution
+			\item bloqué
+			\item en attente
+		\end{itemize}
+	\subsection{Création d'un processus}
+		\begin{itemize}
+			\item Sous POSIX, un seule manière de créer un processus: la fonction \emph{fork()}. Elle duplique le processus en cours. Le processus créé est identique au processus de départ. La seule différence est la valeur de retour de la fonction \emph{fork()}:\begin{itemize}
+				\item dans le processus initial, la valeur est le PID du processus créé.
+				\item dans le processus créé, fork renvoie 0
+			\end{itemize}
+
+			\item execl(chemin, args): remplace le processus par un nouveau processus en utilisant l’exécutable du chemin.
+		\end{itemize}
+		Les processus POSIX sont mis dans une structure arborescente. Chaque processus créé (avec fork) est un fils du processus qui le créé.
+	\subsection{Mort d'un processus POSIX}
+		La fonction kill() permet de tuer un processus. Lorsqu'un processus reçoit le signal SIG.TERM, il s’arrête. L'OS le supprime de la table des processus. Lorsqu'un processus s'arrête, ses sous-processus deviennent fils de init.
+		\begin{description}
+			\item[Remarque]: quand un processus s'arrête, le système garde de l'information pour pouvoir informer le processus père (fonction wait). Tant que le père n'a pas fait de "wait", le processus est conservé. On parle de zombie.
+		\end{description}
+	\subsection{Ordonnancement}
+		\begin{description}
+			\item[ordonnanceur]: partie de l'OS qui décide quel processus s'exécute. C'est un problème compliqué.
+		\end{description}
+		\subsubsection{non préemptif}
+			L'OS n’arrete pas un processus en cours d"exécution.
+		\subsubsection{préemptif}
+			L'OS peut stopper un processus en exécution.
+			\begin{itemize}
+				\item Tourniquet avec quantum de temps: Les processus sont dans une file, et à intervalle de temps régulier, on remplace le processus en exécution par le suivant.
+				\item Tourniquet avec priorité: chaque processus a une priorité. On exécute le premier processus le plus prioritaire pendant un intervalle de temps. En pratique, chaque priorité a sa propre file.
+				\item Loterie: Chaque processus (pret) reçoit un nombre de tickets proportionnel à l'utilisation voulue du processeur. Les processus d'un même utilisateur se partagent les tickets, les processus plus prioritaires reçoivent plus de tickets. L’ordonnanceur choisit un processus en tirant un ticket au hasard.
+			\end{itemize}
+\section{La mémoire}
+		\subsection{espace d'adressage: abstraction de la mémoire}
+			Avec un système multi-programmé, l'allocation naïve ne marche pas bien. La mémoire se fragmente au fur et a mesure de l'apparition des processus. On peut faire croire au processus que sa mémoire commence à 0.
+		\subsection{Représentation de la mémoire dans l'OS}
+			L'OS connaît le quantité de RAM à sa disposition, il doit gérer les parties libres/occupées de la mémoire.
+			\begin{itemize}
+				\item Avec un tableau de bits: chaque bit représente l'état d'un bloc mémoire.
+				\item Avec une liste chaînée de descripteurs de zones libres.
+			\end{itemize}
+		\subsection{Algorithme d'affectation}
+			Il faut choisir une zone libre de mémoire à la demande:
+			\begin{itemize}
+				\item First Fit: On choisit le premier emplacement libre assez grand.
+				\item Next Fit: On prends le premier emplacement assez grand en partant de l'allocation précédente.
+				\item Best Fit: On prends le meilleur emplacement (plus proche possible).
+				\item Worst Fit: On prends le pire.
+			\end{itemize}
+		\subsection{Mémoire virtuelle, pagination}
+			Objectif: pouvoir ajouter de la mémoire à la demande des processus. On découpe la RAM en blocs de taille fixe (4 ko). Ces blocs sont appelés \emph{cadres}. L'espace d'adressage va de 0x000000... à 0xfffffff... (toutes les adresses disponibles). Cet espace virtuel est découpé en blocs de taille fixe (même que celle des cadres), appelés pages. Les informations sur les pages sont stockées dans la table des pages.
+\end{document}
