@@ -85,4 +85,47 @@
 			\end{itemize}
 		\subsection{Mémoire virtuelle, pagination}
 			Objectif: pouvoir ajouter de la mémoire à la demande des processus. On découpe la RAM en blocs de taille fixe (4 ko). Ces blocs sont appelés \emph{cadres}. L'espace d'adressage va de 0x000000... à 0xfffffff... (toutes les adresses disponibles). Cet espace virtuel est découpé en blocs de taille fixe (même que celle des cadres), appelés pages. Les informations sur les pages sont stockées dans la table des pages.
+		\subsection{Table des pages}
+			Pour chaque page, on stocke:
+			\begin{itemize}
+				\item \no de cadre correspondant
+				\item boolean pour savoir si la page est in (RAM) ou out (swap)
+				\item boolean pour savoir si la page a été lue (référence)
+				\item boolean pour savoir si la page a été modifiée (dirty)
+			\end{itemize}
+			La traduction est faite par la MMU en utilisant la table des pages (niveau hardware).
+		\subsection{Pagination et swaping}
+			Pour les systèmes avec peu de mémoire, on utilise en général un morceau du disque dur comme mémoire secondaire. Cette mémoire ne peut pas remplacer la RAM. Elle sert à stocker des cadres qui ne sont pas utilisés. Lorsque la RAM est pleine, la MMU ne peut pas donner de nouveaux cadres, mais le noyau peut libérer des cadres en les copiant sur le disque. Le choix des cadres peut être fait de plusieurs manières. On parle d'algorithmes de remplacement de pages.
+			\begin{itemize}
+				\item FIFO: premier cadre arrivé, premier cadre supprimé.
+				\item LRU: "least recently used"
+				\item NRU: "not recently used".
+			\end{itemize}
+	\section{Système de fichier}
+		Un fichier est la plus petite unité d'information du disque accessible au processus.
+		\paragraph{Hypothèse}: On suppose que tous les supports ont deux opérations:\begin{itemize}
+			\item read(k): lire l'octet k du support
+			\item write(k, o): écrire l'octet o à l'emplacement k
+		\end{itemize}
+		\paragraph{} Il faut définir les fichiers uniquement à partir de ces fonctions.
+		\subsection{abstraction des fichiers}
+			identification des fichiers: chaque fichier à un nom avec une ou plusieurs extensions, des droits associés aux utilisateurs, des attributs.
+		\subsection{accès aux fichiers}
+			se fait en utilisant des fonctions "haut niveau" qui n'utilise que les deux fonctions read et write. On peut ensuite programmer des fonctions plus complexes à partir de ça.
+		\subsection{organisation des fichiers}
+			\begin{itemize}
+				\item en vrac: tous les fichiers au même endroit
+				\item en arbre: chaque répertoire contient des fichier et d'autres répertoires. Chaque fichier est identifié par la branche de répertoires et son nom (chemin).
+				\item en base de donnée
+			\end{itemize}
+		\subsection{implantation des systèmes de fichiers}
+			\subsubsection{Partition}		
+				Un partition est une zone consécutive du disque.
+			\subsubsection{Organisation des fichiers sur la partition}
+				\begin{itemize}
+					\item les fichiers sont stockés les uns à la suite des autres
+					\item table de blocs en mémoire (FAT)
+					\item les fichiers sont représentés par des inodes
+				\end{itemize}
+		
 \end{document}
